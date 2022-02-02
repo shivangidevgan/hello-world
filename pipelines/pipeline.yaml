@@ -16,7 +16,7 @@ variables:
       dockerfile: "$(Build.SourcesDirectory)/hello-world/src/Dockerfile.CI"
       imageTag: 0.1.$(Build.BuildId)
       isDotNetBased: true
-      buildArguments: "--build-arg FEED_URL=$(artifactsEndpoint) --build-arg PAT=$(artifactsAccessToken)"
+      buildArguments: "--build-arg PAT=$(artifactsAccessToken)"
       
 stages:
 - stage: 'Build'
