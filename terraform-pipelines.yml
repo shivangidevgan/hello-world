@@ -1,0 +1,39 @@
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+- task: TerraformInstaller@0
+  displayName: install Terraform
+  inputs:
+    terraformVersion: '0.14.6'
+
+- task: TerraformTaskV1@0
+  displayName: terraform init
+  inputs:
+    provider: 'azurerm'
+    command: 'init'
+    workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/Scripts'
+    backendServiceArm: 'Visual Studio Enterprise(e79f9daf-175e-4ad2-a990-4ef7f9b7fe55)'
+    backendAzureRmResourceGroupName: 'Imbue-Terraform'
+    backendAzureRmStorageAccountName: 'imbueterraform'
+    backendAzureRmContainerName: 'terraform'
+    backendAzureRmKey: 'imbue-infra-dev.tfstate'
+
+- task: TerraformTaskV1@0
+  displayName: terraform plan -out=tfplan
+  inputs:
+    provider: 'azurerm'
+    command: 'plan'
+    workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/Scripts'
+    commandOptions: '-out=tfplan'
+    environmentServiceNameAzureRM: 'Visual Studio Enterprise(e79f9daf-175e-4ad2-a990-4ef7f9b7fe55)'
+
+
+- task: TerraformTaskV1@0
+  displayName: terraform apply tfplan
+  inputs:
+    provider: 'azurerm'
+    command: 'apply'
+    workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/Scripts'
+    commandOptions: 'tfplan'
+    environmentServiceNameAzureRM: 'Visual Studio Enterprise(e79f9daf-175e-4ad2-a990-4ef7f9b7fe55)'
