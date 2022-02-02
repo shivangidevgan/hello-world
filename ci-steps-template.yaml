@@ -1,0 +1,47 @@
+steps:
+  - task: UseDotNet@2
+    condition: and(succeeded(), eq(variables.isDotNetBased, true))
+    displayName: 'Use .NET Core sdk'
+    inputs:
+     packageType: sdk
+     version: 5.0.x
+     includePreviewVersions: true
+     installationPath: $(Agent.ToolsDirectory)/dotnet
+
+  - task: NuGetAuthenticate@0
+    condition: and(succeeded(), eq(variables.isDotNetBased, true))
+  - script: dotnet test $(unitTestPath) --logger trx
+    condition: and(succeeded(), eq(variables.isDotNetBased, true))
+
+  - task: Docker@2
+    displayName: Build an image
+    inputs:
+     containerRegistry: |
+      $(dockerRegistryServiceConnectionName)
+     command: build
+     repository: $(imageName)
+     dockerfile: $(dockerfile)
+     buildContext: $(Build.SourcesDirectory)/$(projectName)
+     arguments: $(buildArguments)
+     tags: |
+      $(imageTag)
+
+  - task: Docker@2
+    displayName: push an image to container registry
+    inputs:
+     containerRegistry: |
+      $(dockerRegistryServiceConnectionName)
+     command: push
+     repository: $(imageName)
+     dockerfile: $(dockerfile)
+     buildContext: $(Build.SourcesDirectory)/$(projectName)     
+     tags: |
+      $(imageTag)
+  - checkout: devops-artifacts
+
+  - task: HelmInstaller@1
+    displayName: 'install helm'
+    inputs:
+     helmVersionToInstall: $(helmVersion)
+  - bash: |
+       echo $(registryPassword) | helm registry login $(registryName).azurecr.io --username $(registryLogin) --password-stdin      

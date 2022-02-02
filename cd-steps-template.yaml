@@ -1,0 +1,37 @@
+steps:
+  - checkout: none
+
+  - task: HelmInstaller@1
+    displayName: "install helm"
+    inputs:
+      helmVersionToInstall: $(helmVersion)
+      checkLatestHelmVersion: false
+      installKubectl: false
+
+  - bash: |
+      echo $(registryPassword) | helm registry login $(registryServerName) --username $(registryLogin) --password-stdin          
+      helm chart pull $(registryServerName)/helm/$(chartName):$(helmChartVersion)
+      helm chart export $(registryServerName)/helm/$(chartName):$(helmChartVersion) --destination $(pipeline.workspace)/install
+    failOnStderr: true
+    displayName: "Pull Helm Chart from ACR"
+  - task: KubectlInstaller@0
+    inputs:
+      kubectlVersion: "latest"
+  - task: HelmDeploy@0
+    displayName: "deploy helm chart"
+    inputs:
+      azureSubscription: $(Azure.ServiceConnection)
+      azureResourceGroup: $(rg)
+      kubernetesCluster: $(aks)
+      command: upgrade
+      namespace: $(k8sNamespace)
+      chartName: $(chartName)
+      chartType: FilePath
+      chartPath: $(pipeline.workspace)/install/$(chartName)
+      install: true
+      releaseName: $(chartName)
+      chartVersion: $helmChartVersion
+      waitForExecution: true
+      overrideValues: image.repository=$(registryServerName)/cr.$(chartName),ingress.host=$(hostName),ingress.ingressClass=$(ingressClass)
+      arguments: "--atomic --timeout 120s --create-namespace"
+      useClusterAdmin: true
