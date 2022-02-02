@@ -22,4 +22,5 @@ module "storage_acc" {
   source = "./modules/storage_acc"
   resource_group_name = var.resource_group_name
   location = var.location
+  username = var.username
 }

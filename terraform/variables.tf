@@ -7,3 +7,6 @@ variable "location" {
 variable "subscriptionid" {
   type=string
 }
+variable "username" {
+  type=string
+}
