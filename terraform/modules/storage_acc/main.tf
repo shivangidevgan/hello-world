@@ -28,6 +28,7 @@ resource "azurerm_storage_account" "storage_acc" {
   location                 = var.location
   account_tier             = "Standard"
   account_replication_type = "LRS"
+
 }
 
 resource "azurerm_sql_database" "database" {
