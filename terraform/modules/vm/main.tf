@@ -1,3 +1,14 @@
+resource "random_string" "rand_passwd" {
+  length = 15
+  special = true
+  lower = false
+  upper = false
+  number = true
+  min_numeric = 3
+  min_special = 3
+  override_special = "&!$"
+}
+
 resource "azurerm_virtual_network" "vnet" {
   name                = "virtual-network"
   address_space       = ["10.0.0.0/16"]

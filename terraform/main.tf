@@ -18,9 +18,21 @@ module "acr" {
   location = var.location
 }
 
-module "storage_acc" {
-  source = "./modules/storage_acc"
+# module "storage_acc" {
+#   source = "./modules/storage_acc"
+#   resource_group_name = var.resource_group_name
+#   location = var.location
+#   username = var.username
+# }
+
+module "loadbalancer"{
+  source = "./modules/loadbalancer"
   resource_group_name = var.resource_group_name
   location = var.location
-  username = var.username
+}
+
+module "vnet"{
+  source = "./modules/vnet"
+  resource_group_name = var.resource_group_name
+  location = var.location
 }

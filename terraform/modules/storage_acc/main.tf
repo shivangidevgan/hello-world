@@ -1,8 +1,8 @@
 resource "random_string" "rand_passwd" {
-  length = 6
+  length = 15
   special = true
-  lower = false
-  upper = false
+  lower = true
+  upper = true
   number = true
   min_numeric = 3
   min_special = 3
@@ -23,7 +23,7 @@ resource "azurerm_sql_server" "sql_server" {
 }
 
 resource "azurerm_storage_account" "storage_acc" {
-  name                     = "neusa"
+  name                     = "neusa1"
   resource_group_name      = var.resource_group_name
   location                 = var.location
   account_tier             = "Standard"
