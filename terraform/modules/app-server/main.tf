@@ -1,4 +1,4 @@
-resource "upcloud_network" "app_network" {
+resource "cloud_network" "app_network" {
   name = "Application network"
   zone = var.zone 
 
@@ -9,7 +9,7 @@ resource "upcloud_network" "app_network" {
   }
 }
 
-resource "upcloud_network" "db_network" {
+resource "cloud_network" "db_network" {
   name = "Database network"
   zone = var.zone 
 
@@ -20,7 +20,7 @@ resource "upcloud_network" "db_network" {
   }
 }
 
-resource "upcloud_server" "app" {
+resource "cloud_server" "app" {
   zone     = var.zone 
   hostname = "app${count.index + 1}.startup.io"
   plan     = var.plans["app"] 
@@ -42,10 +42,10 @@ resource "upcloud_server" "app" {
 
   network_interface {
     type    = "private"
-    network = upcloud_network.app_network.id
+    network = cloud_network.app_network.id
   }
   network_interface {
     type    = "private"
-    network = upcloud_network.db_network.id
+    network = cloud_network.db_network.id
   }
 }

@@ -5,3 +5,8 @@ variable "resource_group_name" {
 variable "location" {
   type=string
 }
+
+variable "path" {
+  type = string
+  default = "packer/cloudconfig.tpl"
+}

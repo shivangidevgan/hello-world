@@ -1,29 +1,56 @@
-resource "random_string" "rand_passwd" {
-  length = 15
-  special = true
-  lower = true
-  upper = true
-  number = true
-  min_numeric = 3
-  min_special = 3
-  override_special = "&!$"
+locals {
+  prefix = var.username
 }
 
-resource "vmss-cloudinit" {
-  source                                 = "Azure/vmss-cloudinit/azurerm"
-  resource_group_name                    = var.resource_group_name
-  cloudconfig_file                       = var.path
-  location                               = var.location
-  vm_size                                = "Standard_DS2_v2"
-  admin_username                         = "azureuser"
-  admin_password                         = random_string.rand_passwd.result
-  ssh_key                                = "~/.ssh/id_rsa.pub"
-  nb_instance                            = 2
-  vm_os_simple                           = "UbuntuServer"
-  vnet_subnet_id                         = var.subnet_id
-  load_balancer_backend_address_pool_ids = "${module.loadbalancer.azurerm_lb_backend_address_pool_id}"
+resource "azurerm_linux_virtual_machine_scale_set" "vmss" {
+  name                = "buildagent-vmss"
+  resource_group_name = var.resource_group_name
+  location            = var.location
+  sku                 = "Standard_b2ms"
+  instances           = var.numberOfWorkerNodes
+
+  overprovision          = false
+  single_placement_group = false
+
+  admin_username      = "adminuser"
+  admin_password      = azurerm_key_vault_secret.vmsecret.value
+
+  disable_password_authentication = false
+
+  custom_data = base64encode(data.local_file.cloudinit.content)
+
+  source_image_reference {
+    publisher = "canonical"
+    offer     = "0001-com-ubuntu-server-focal"
+    sku       = "20_04-lts"
+    version   = "latest"
+  }
+
+  os_disk {
+    storage_account_type = "Standard_LRS"
+    caching              = "ReadOnly"
+
+    diff_disk_settings {
+      option = "Local"
+    }
+  }
+
+  network_interface {
+    name    = join("-",[local.username,"vmss-nic"])
+    primary = true
+
+    ip_configuration {
+      name      = join("-",[local.username,"vmss-ipconfig"])
+      primary   = true
+      subnet_id = azurerm_subnet.vmss.id
+    }
+  }
+
+  boot_diagnostics {
+    storage_account_uri = null
+  }
 }
 
-output "vmss_id" {
-  value = "${module.vmss-cloudinit.vmss_id}"
+data "local_file" "cloudinit" {
+    filename = "${path.module}/cloudinit.conf"
 }

@@ -8,8 +8,13 @@ variable "location" {
 
 variable "path" {
   type = string
-  default = "${path.module}/cloudconfig.tpl"
+  default = "D:/Assignment/hello-world/terraform/modules/vm_CloudInit/cloudconfig.tpl"
 }
+
 variable "subnet_id" {
+  type = string
+}
+
+variable "lbid" {
   type = string
 }

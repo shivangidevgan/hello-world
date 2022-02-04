@@ -1,3 +1,14 @@
+resource "random_string" "rand_passwd" {
+  length = 15
+  special = true
+  lower = true
+  upper = true
+  number = true
+  min_numeric = 3
+  min_special = 3
+  override_special = "&!$"
+}
+
 resource "azurerm_public_ip" "public_ip" {
   name                = "PublicIPForLB"
   location            = var.location
@@ -6,7 +17,7 @@ resource "azurerm_public_ip" "public_ip" {
 }
 
 resource "azurerm_lb" "lb" {
-  name                = "TestLoadBalancer"
+  name                = "LoadBalancerTest"
   location            = var.location
   resource_group_name = var.resource_group_name
 
@@ -16,7 +27,9 @@ resource "azurerm_lb" "lb" {
   }
 }
 
-
+output "lbid" {
+  value = azurerm_lb.lb.id
+}
 
 
 

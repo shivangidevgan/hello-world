@@ -1,8 +1,8 @@
 resource "random_string" "rand_passwd" {
   length = 15
   special = true
-  lower = false
-  upper = false
+  lower = true
+  upper = truw
   number = true
   min_numeric = 3
   min_special = 3
@@ -56,8 +56,8 @@ resource "azurerm_virtual_machine" "vm" {
   }
   os_profile {
     computer_name  = "hostname"
-    admin_username = "testadmin"
-    admin_password = "Password1234!"
+    admin_username = var.username
+    admin_password = random_string.rand_passwd.result
   }
   os_profile_linux_config {
     disable_password_authentication = false
@@ -68,14 +68,14 @@ resource "azurerm_virtual_machine" "vm" {
 }
 
 #autoscale sets
-resource "azurerm_windows_virtual_machine_scale_set" "example" {
-  name                = "example-vmss"
+resource "azurerm_windows_virtual_machine_scale_set" "vmss" {
+  name                = "vmss"
   resource_group_name = var.resource_group_name
   location            = var.location
-  sku                 = "Standard_F2"
+  sku                 = "Standard_B2ms"
   instances           = 1
-  admin_password      = "P@55w0rd1234!"
-  admin_username      = "adminuser"
+  admin_password      = random_string.rand_passwd.result
+  admin_username      = var.username
 
   source_image_reference {
     publisher = "MicrosoftWindowsServer"
