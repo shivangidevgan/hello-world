@@ -8,7 +8,7 @@ resources:
 
 variables:
   - group: acr-variable-group
-  - template: ci-variables.yaml
+  - template: tf-variables-template.yaml
     parameters:
       projectName: "hello-world"
       chartName: "hello-world"
