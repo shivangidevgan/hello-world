@@ -17,33 +17,21 @@ stages:
           displayName: 'dotnet restore'
           inputs:
             command: 'restore'
-            projects: '*.sln'
+            projects: '$(Build.SourcesDirectory)/hello-world/src/dotnet-core-hello-world.csproj'
 
         - task: DotNetCoreCLI@2
           displayName: Build
           inputs:
             command: 'build'
-            projects: '*.sln'
+            projects: '*.csproj'
             arguments: --configuration Release
 
         - task: DotNetCoreCLI@2
           displayName: Test
           inputs:
             command: test
-            projects: '*.sln'
+            projects: '*.csproj'
             arguments: '--configuration $(BuildConfiguration)'
-       
-        - task: DotNetCoreCLI@2
-          displayName: 'Publish the project - $(buildConfiguration)'
-          inputs:
-            command: 'publish'
-            projects: '**/*.csproj'
-            publishWebProjects: false
-            arguments: '--no-build --configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/$(buildConfiguration)'
-            zipAfterPublish: true
-
-        - publish: '$(Build.ArtifactStagingDirectory)'
-          artifact: drop
 
 - stage: 'Dev'
   displayName: 'Dev'
