@@ -2,7 +2,7 @@ resources:
   repositories:  
   - repository: hello-world
     type: github
-    endpoint: github-connection
+    endpoint: github-conn
     name: shivangidevgan/hello-world
     ref: main
 
