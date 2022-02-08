@@ -1,95 +1,58 @@
-pool:
-  vmImage: ubuntu-latest
+resources:
+  repositories:  
+  - repository: hello-world
+    type: github
+    endpoint: github-connection
+    name: shivangidevgan/hello-world
+    ref: main
 
 variables:
-  buildConfiguration: 'Release'
-  projectName: $('projectName')
-  websiteName: $('websiteName')
-  appPoolName: $('appPoolName')
-
+  - group: acr-variable-group
+  - template: ci-variables.yaml
+    parameters:
+      projectName: "hello-world"
+      chartName: "hello-world"
+      #dockerRegistryServiceConnectionName: $(ACRConnection)
+      #dockerfile: "$(Build.SourcesDirectory)/hello-world/src/Dockerfile.CI"
+      imageTag: 0.1.$(Build.BuildId)
+      isDotNetBased: true
+      #buildArgument: "--build-arg PAT=$(artifactsAccessToken)"
+      
 stages:
 - stage: 'Build'
   displayName: 'Build'
+  jobs: 
+  - job: 'Build'
+    displayName: 'Build job'
+    pool:
+      vmImage: ubuntu-18.04
+    steps:
+      - checkout: hello-world
+      - template: ci-steps-template.yaml
+
+- stage: Dev
+  displayName: 'Deploy to the dev environment'
+  dependsOn: Build
   jobs:
-     - job: 
-       steps:  
-        - task: DotNetCoreCLI@2
-          displayName: 'dotnet restore'
-          inputs:
-            command: 'restore'
-            projects: '*.sln'
+    - deployment: Deploy
+      variables:
+        - group: acr-variable-group
+      displayName: Deploy
+      pool:
+        vmImage: ubuntu-18.04
+      environment: Dev
+      strategy:
+        runOnce:
+          deploy:
+            steps:
+              - template: cd-steps-template.yaml
 
-        - task: DotNetCoreCLI@2
-          displayName: Build
-          inputs:
-            command: 'build'
-            projects: '*.sln'
-            arguments: --configuration Release
-
-        - task: DotNetCoreCLI@2
-          displayName: Test
-          inputs:
-            command: test
-            projects: '*.sln'
-            arguments: '--configuration $(BuildConfiguration)'
-       
-        - task: DotNetCoreCLI@2
-          displayName: 'Publish the project - $(buildConfiguration)'
-          inputs:
-            command: 'publish'
-            projects: '**/*.csproj'
-            publishWebProjects: false
-            arguments: '--no-build --configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/$(buildConfiguration)'
-            zipAfterPublish: true
-
-        - publish: '$(Build.ArtifactStagingDirectory)'
-          artifact: drop
-
-- stage: 'Dev'
-  displayName: 'Dev'
-  dependsOn: 'Build'
-  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+- stage: Test
+  displayName: 'Deploy to the Test environment'
+  dependsOn: Dev
   jobs:
-   - deployment: Dev
-     displayName: Dev
-     environment: 
-       name: 'Dev'    
-       resourceType: VirtualMachine
-     variables:
-     - name: websitePhysicalPath
-       value: '%SystemDrive%\inetpub\wwwroot\$(websiteName)'
-
-     strategy:
-      runOnce:
-        deploy:
-          steps: 
-          - task: IISWebAppManagementOnMachineGroup@0
-            inputs:            
-              IISDeploymentType: 'IISWebsite'
-              ActionIISWebsite: 'CreateOrUpdateWebsite'
-              WebsiteName: '$(websiteName)'
-              WebsitePhysicalPath: '$(websitePhysicalPath)'
-              WebsitePhysicalPathAuth: 'WebsiteUserPassThrough'
-              CreateOrUpdateAppPoolForWebsite: true
-              AppPoolNameForWebsite: '$(appPoolName)'
-              DotNetVersionForWebsite: 'No Managed Code'
-              PipeLineModeForWebsite: 'Integrated'
-              AppPoolIdentityForWebsite: 'ApplicationPoolIdentity'
-              AddBinding: true
-              Bindings: |
-                  {
-                      bindings:[
-                          {
-                              "protocol":"http",
-                              "ipAddress":"",
-                              "hostname":"",
-                              "port":"80",
-                              "sslThumbprint":"",
-                              "sniFlag":false
-                          }
-                      ]
-                  }
-          - task: IISWebAppDeploymentOnMachineGroup@0
-            inputs:
-              WebSiteName: '$(websiteName)'
-              Package: '$(Pipeline.Workspace)/drop/$(buildConfiguration)/$(projectName).zip'
+    - deployment: Deploy
+      displayName: Deploy
+      pool:
+        vmImage: ubuntu-18.04
+      environment: Test

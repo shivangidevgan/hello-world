@@ -1,12 +1,18 @@
 pool:
-  vmImage: ubuntu-latest
+  vmImage: windows-2022
 
 steps:
-- task: PackerTool@0
+# - task: PackerBuild@1
+#   inputs:
+#     templateType: 'custom'
+#     customTemplateLocation: '$(Build.SourcesDirectory)/packer/windows.json'
+#     ConnectedServiceName: github-conn
+#     location: 'Central India'
+#     azureResourceGroup: 'Dev-RG'
+    
+- task: Packer@1
   inputs:
-    version: '1.*'
-
-- task: PackerBuild@1
-  inputs:
-    templateType: 'custom'
-    customTemplateLocation: '$(Build.SourcesDirectory)/hello-world/packer/windows.json'
+    connectedServiceType: 'azure'
+    azureSubscription: 'Visual Studio Professional Subscription(558ee612-a7f5-4b2e-ab73-d55bfd6a6d26)'
+    templatePath: '$(Build.SourcesDirectory)/packer/windows.json'
+    command: 'build'
