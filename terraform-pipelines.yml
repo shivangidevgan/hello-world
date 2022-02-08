@@ -2,7 +2,7 @@ pool:
   vmImage: ubuntu-latest
 
 variables:
-  - group: acr-variable-group
+  - group: Artifacts
   - template: tf-variables-template.yaml
     parameters:
       rgName: "Dev-RG"
