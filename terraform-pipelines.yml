@@ -1,48 +1,60 @@
-pool:
-  vmImage: ubuntu-latest
+resources:
+  repositories:  
+  - repository: hello-world
+    type: github
+    endpoint: github-connection
+    name: shivangidevgan/hello-world
+    ref: main
 
 variables:
-  - group: Artifacts
+  - group: acr-variable-group
   - template: tf-variables-template.yaml
     parameters:
-      rgName: "Dev-RG"
-      storageName: "neusat1"
-      container: "statefiles"
+      projectName: "hello-world"
+      chartName: "hello-world"
+      imageTag: 0.1.$(Build.BuildId)
+      isDotNetBased: true
+      #buildArguments: "--build-arg PAT=$(artifactsAccessToken)"
+      
+stages:
+- stage: 'Build'
+  displayName: 'Build'
+  jobs: 
+  - job: 'Build'
+    displayName: 'Build job'
+    pool:
+      vmImage: ubuntu-18.04
+    steps:
+      - checkout: hello-world
+      - template: tf-steps-template.yaml
 
+- stage: Dev
+  displayName: 'Dev environment'
+  dependsOn: Build
+  jobs:
+    variables:
+      - group: acr-variable-group
+    displayName: Deploy
+    pool:
+      vmImage: ubuntu-18.04
+    environment: Dev
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - template: tf-steps-template.yaml
 
-steps:
-- task: TerraformInstaller@0
-  displayName: install Terraform
-  inputs:
-    terraformVersion: '0.14.6'
-
-- task: TerraformTaskV1@0
-  displayName: terraform init
-  inputs:
-    provider: 'azurerm'
-    command: 'init'
-    workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
-    backendServiceArm: $(subscriptionId)
-    backendAzureRmResourceGroupName: $(rgName)
-    backendAzureRmStorageAccountName: $(storageName)
-    backendAzureRmContainerName: $(container)
-    backendAzureRmKey: dev.tfstate
-
-- task: TerraformTaskV1@0
-  displayName: terraform plan -out=tfplan
-  inputs:
-    provider: 'azurerm'
-    command: 'plan'
-    workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
-    commandOptions: '-out=tfplan'
-    environmentServiceNameAzureRM: $(subscriptionId)
-
-
-- task: TerraformTaskV1@0
-  displayName: terraform apply tfplan
-  inputs:
-    provider: 'azurerm'
-    command: 'apply'
-    workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
-    commandOptions: 'tfplan'
-    environmentServiceNameAzureRM: $(subscriptionId)
+- stage: Test
+  displayName: 'Deploy to the Test environment'
+  dependsOn: Dev
+  jobs:
+    - deployment: Deploy
+      displayName: Deploy
+      pool:
+        vmImage: ubuntu-18.04
+      environment: Test
+      strategy:
+        runOnce:
+          deploy:
+            steps:
+              - template: tf-steps-template.yaml
