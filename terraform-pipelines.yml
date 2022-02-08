@@ -1,6 +1,15 @@
 pool:
   vmImage: ubuntu-latest
 
+variables:
+  - group: acr-variable-group
+  - template: tf-variables-template.yaml
+    parameters:
+      rgName: "Dev-RG"
+      storageName: "neusat1"
+      container: "statefiles"
+
+
 steps:
 - task: TerraformInstaller@0
   displayName: install Terraform
@@ -13,11 +22,11 @@ steps:
     provider: 'azurerm'
     command: 'init'
     workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
-    backendServiceArm: 'Visual Studio Professional Subscription(558ee612-a7f5-4b2e-ab73-d55bfd6a6d26)'
-    backendAzureRmResourceGroupName: 'Dev-RG'
-    backendAzureRmStorageAccountName: 'neustg'
-    backendAzureRmContainerName: 'test'
-    backendAzureRmKey: 'dev.tfstate'
+    backendServiceArm: $(subscriptionId)
+    backendAzureRmResourceGroupName: $(rgName)
+    backendAzureRmStorageAccountName: $(storageName)
+    backendAzureRmContainerName: $(container)
+    backendAzureRmKey: dev.tfstate
 
 - task: TerraformTaskV1@0
   displayName: terraform plan -out=tfplan
@@ -26,7 +35,7 @@ steps:
     command: 'plan'
     workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
     commandOptions: '-out=tfplan'
-    environmentServiceNameAzureRM: 'Visual Studio Professional Subscription(558ee612-a7f5-4b2e-ab73-d55bfd6a6d26)'
+    environmentServiceNameAzureRM: $(subscriptionId)
 
 
 - task: TerraformTaskV1@0
@@ -36,4 +45,4 @@ steps:
     command: 'apply'
     workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
     commandOptions: 'tfplan'
-    environmentServiceNameAzureRM: 'Visual Studio Professional Subscription(558ee612-a7f5-4b2e-ab73-d55bfd6a6d26)'
+    environmentServiceNameAzureRM: $(subscriptionId)
