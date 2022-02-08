@@ -2,10 +2,6 @@ pool:
   vmImage: ubuntu-latest
 
 steps:
-- task: PackerTool@0
-  inputs:
-    version: '1.*'
-
 - task: PackerBuild@1
   inputs:
     templateType: 'custom'
