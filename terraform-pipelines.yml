@@ -8,7 +8,7 @@ resources:
 
 variables:
   - group: acr-variable-group
-  - template: tf-variables-template.yaml
+  - template: ci-variables.yaml
     parameters:
       projectName: "hello-world"
       chartName: "hello-world"
@@ -29,20 +29,21 @@ stages:
       - template: tf-steps-template.yaml
 
 - stage: Dev
-  displayName: 'Dev environment'
+  displayName: 'Deploy to the dev environment'
   dependsOn: Build
   jobs:
-    variables:
-      - group: acr-variable-group
-    displayName: Deploy
-    pool:
-      vmImage: ubuntu-18.04
-    environment: Dev
-    strategy:
-      runOnce:
-        deploy:
-          steps:
-          - template: tf-steps-template.yaml
+    - deployment: Deploy
+      variables:
+        - group: acr-variable-group
+      displayName: Deploy
+      pool:
+        vmImage: ubuntu-18.04
+      environment: Dev
+      strategy:
+        runOnce:
+          deploy:
+            steps:
+              - template: tf-steps-template.yaml
 
 - stage: Test
   displayName: 'Deploy to the Test environment'
