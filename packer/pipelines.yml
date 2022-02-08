@@ -1,7 +1,11 @@
 pool:
-  vmImage: ubuntu-latest
+  vmImage: windows-2022
 
 steps:
+- task: PackerTool@0
+  inputs:
+    version: '1.*'
+
 - task: PackerBuild@1
   inputs:
     templateType: 'custom'
