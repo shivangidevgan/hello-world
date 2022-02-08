@@ -9,3 +9,7 @@ variable "location" {
 variable "username" {
   type=string
 }
+
+variable "subnetid" {
+  type = string
+}

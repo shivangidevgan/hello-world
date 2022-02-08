@@ -1,9 +1,3 @@
-resource "azurerm_network_security_group" "nsg" {
-  name                = "network-security-group"
-  location            = var.location
-  resource_group_name = var.resource_group_name
-}
-
 resource "azurerm_virtual_network" "vnet" {
   name                = "virtual-network"
   location            = var.location
@@ -21,8 +15,4 @@ resource "azurerm_subnet" "subnet" {
     resource_group_name = var.resource_group_name
     virtual_network_name = azurerm_virtual_network.vnet.name
     address_prefixes = ["10.0.1.0/24"]
-}
-
-output "subnetid" {
-  value = azurerm_subnet.subnet.id
 }

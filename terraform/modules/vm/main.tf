@@ -2,25 +2,19 @@ resource "random_string" "rand_passwd" {
   length = 15
   special = true
   lower = true
-  upper = truw
+  upper = true
   number = true
   min_numeric = 3
   min_special = 3
   override_special = "&!$"
 }
 
-resource "azurerm_virtual_network" "vnet" {
-  name                = "virtual-network"
-  address_space       = ["10.0.0.0/16"]
-  location            = var.location
-  resource_group_name = var.resource_group_name
-}
-
-resource "azurerm_subnet" "internal" {
-  name                 = "internal"
-  resource_group_name  = var.resource_group_name
-  virtual_network_name = azurerm_virtual_network.vnet.name
-  address_prefixes     = ["10.0.2.0/24"]
+resource "azurerm_public_ip" "public_ip" {
+  name                   = "public_ip"
+  location               = var.location
+  resource_group_name    = var.resource_group_name
+  allocation_method      = "Dynamic"
+  
 }
 
 resource "azurerm_network_interface" "nic" {
@@ -29,41 +23,25 @@ resource "azurerm_network_interface" "nic" {
   resource_group_name = var.resource_group_name
 
   ip_configuration {
-    name                          = "testconfiguration1"
-    subnet_id                     = azurerm_subnet.internal.id
+    name                          = "testconfiguration"
+    subnet_id                     = var.subnetid
     private_ip_address_allocation = "Dynamic"
+    public_ip_address_id = azurerm_public_ip.public_ip.id
   }
 }
 
-resource "azurerm_virtual_machine" "vm" {
-  name                  = "vm"
-  location              = var.location
-  resource_group_name   = var.resource_group_name
+resource "azurerm_windows_virtual_machine" "azurevm" {
+  name                            = "vm"
+  resource_group_name             = var.resource_group_name
+  location                        = var.location
+  size                            = "Standard_B2ms"
+  admin_username                  = var.username
+  admin_password                  = random_string.rand_passwd.result
   network_interface_ids = [azurerm_network_interface.nic.id]
-  vm_size               = "Standard_B2ms"
 
-  storage_image_reference {
-    publisher = "Canonical"
-    offer     = "UbuntuServer"
-    sku       = "16.04-LTS"
-    version   = "latest"
-  }
-  storage_os_disk {
-    name              = "myosdisk1"
-    caching           = "ReadWrite"
-    create_option     = "FromImage"
-    managed_disk_type = "Standard_LRS"
-  }
-  os_profile {
-    computer_name  = "hostname"
-    admin_username = var.username
-    admin_password = random_string.rand_passwd.result
-  }
-  os_profile_linux_config {
-    disable_password_authentication = false
-  }
-  tags = {
-    environment = "Dev"
+  os_disk {
+    storage_account_type = "Standard_LRS"
+    caching              = "ReadWrite"
   }
 }
 
@@ -96,7 +74,7 @@ resource "azurerm_windows_virtual_machine_scale_set" "vmss" {
     ip_configuration {
       name      = "internal"
       primary   = true
-      subnet_id = azurerm_subnet.internal.id
+      subnet_id = var.subnetid
     }
   }
 }

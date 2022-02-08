@@ -27,10 +27,6 @@ resource "azurerm_lb" "lb" {
   }
 }
 
-output "lbid" {
-  value = azurerm_lb.lb.id
-}
-
 
 
 

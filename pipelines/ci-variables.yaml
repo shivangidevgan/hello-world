@@ -5,6 +5,12 @@ parameters:
   - name : imageName
     default: ''
     type: string
+  - name : websiteName
+    default: ''
+    type: string
+  - name : appPoolName
+    default: ''
+    type: string
   - name : chartName
     default: ''
     type: string
@@ -25,6 +31,9 @@ parameters:
 
 variables:
   registryServerName: '$(registryName).azurecr.io'
+  imageName: ${{ parameters.imageName }}
+  websiteName: ${{ parameters.websiteName }}
+  appPoolName: ${{ parameters.appPoolName }}
   isDotNetBased: ${{ parameters.isDotNetBased }}
   dockerRegistryServiceConnectionName: ${{ parameters.dockerRegistryServiceConnectionName }}
   dockerfile: ${{ parameters.dockerfile }}
