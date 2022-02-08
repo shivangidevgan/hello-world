@@ -5,4 +5,4 @@ steps:
 - task: PackerBuild@1
   inputs:
     templateType: 'custom'
-    customTemplateLocation: '$(Build.SourcesDirectory)/hello-world/packer/windows.json'
+    customTemplateLocation: '$(Build.SourcesDirectory)/packer/windows.json'
