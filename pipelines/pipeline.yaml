@@ -12,8 +12,8 @@ variables:
     parameters:
       projectName: "hello-world"
       chartName: "hello-world"
-      dockerRegistryServiceConnectionName: $(ACRConnection)
-      dockerfile: "$(Build.SourcesDirectory)/hello-world/src/Dockerfile.CI"
+      #dockerRegistryServiceConnectionName: $(ACRConnection)
+      #dockerfile: "$(Build.SourcesDirectory)/hello-world/src/Dockerfile.CI"
       imageTag: 0.1.$(Build.BuildId)
       isDotNetBased: true
       buildArguments: "--build-arg PAT=$(artifactsAccessToken)"

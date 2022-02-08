@@ -1,0 +1,21 @@
+parameters:
+  - name : location
+    default: ''
+    type: string
+  - name: storageAccountName
+    default: ''
+    type: string
+  - name: azureResourceGroup
+    default: ''
+    type: string
+  - name: packagePath
+    default: '$(Build.SourcesDirectory)/hello-world/packer/windowsImage.pkr.hcl'
+    type: string
+
+
+
+variables:
+  location: ${{ parameters.location }}
+  storageAccountName: ${{ parameters.storageAccountName }}
+  azureResourceGroup: ${{ parameters.azureResourceGroup }}
+  packagePath: ${{ parameters.packagePath }}

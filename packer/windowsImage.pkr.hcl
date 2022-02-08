@@ -24,7 +24,7 @@ variable "client_secret" {
 
 variable "location" {
   type    = string
-  default = ""
+  default = "Central India"
 }
 
 variable "managed_image_name" {

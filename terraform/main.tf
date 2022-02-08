@@ -47,4 +47,7 @@ module "web_app_server" {
 #   source = "./modules/vm_cloudinit"
 #   resource_group_name = var.resource_group_name
 #   location = var.location
+#   username= var.username
+#   lbid= module.loadbalancer.lbid
+#   subnet_id = module.vnet.subnetid
 # }

@@ -18,3 +18,7 @@ variable "subnet_id" {
 variable "lbid" {
   type = string
 }
+
+variable "username" {
+  type= string
+}

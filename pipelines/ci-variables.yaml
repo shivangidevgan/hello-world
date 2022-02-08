@@ -11,15 +11,6 @@ parameters:
   - name : appPoolName
     default: ''
     type: string
-  - name : chartName
-    default: ''
-    type: string
-  - name : dockerRegistryServiceConnectionName
-    default: ''
-    type: string
-  - name: dockerfile
-    default: ''
-    type: string
   - name: imageTag
     default: ''
     type: string
@@ -35,10 +26,6 @@ variables:
   websiteName: ${{ parameters.websiteName }}
   appPoolName: ${{ parameters.appPoolName }}
   isDotNetBased: ${{ parameters.isDotNetBased }}
-  dockerRegistryServiceConnectionName: ${{ parameters.dockerRegistryServiceConnectionName }}
-  dockerfile: ${{ parameters.dockerfile }}
-  dockerSource: ${{ parameters.dockerSource }}  
   projectName: ${{ parameters.projectName }}
   chartName: ${{ parameters.chartName }}   
   imageTag: ${{ parameters.imageTag }}
-  helmChartVersion: ${{ parameters.helmChartVersion }}
