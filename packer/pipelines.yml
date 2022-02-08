@@ -6,6 +6,6 @@ steps:
   inputs:
     templateType: 'custom'
     customTemplateLocation: '$(Build.SourcesDirectory)/packer/windows.json'
-    ConnectedServiceName: $(github_connection)
+    ConnectedServiceName: $(github-connection)
     location: 'Central India'
     azureResourceGroup: 'Dev-RG'
